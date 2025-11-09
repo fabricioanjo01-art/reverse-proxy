@@ -1,32 +1,32 @@
-const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+import express from "express";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const app = express();
-
-app.set("trust proxy", true);
-
-// Redireciona a raiz para /#/login
-app.get("/", (req, res) => {
-  return res.redirect("/#/login");
-});
 
 app.use(
   "/",
   createProxyMiddleware({
     target: "http://34.198.204.124:9001",
     changeOrigin: true,
-    ws: true,
-    followRedirects: true,
+    xfwd: true,
     secure: false,
     onProxyReq: (proxyReq) => {
-      proxyReq.removeHeader("x-forwarded-proto");
+      // força host original para evitar redirecionamentos
+      proxyReq.setHeader("Host", "34.198.204.124:9001");
     },
-    onError(err, req, res) {
-      console.error("Proxy Error:", err);
-      res.status(500).send("Erro ao acessar o sistema origem");
+    onProxyRes: (proxyRes) => {
+      // remove headers que causam redirect infinito
+      delete proxyRes.headers["location"];
+      delete proxyRes.headers["content-security-policy"];
+    },
+    pathRewrite: (path) => {
+      // mantém rota SPA Vue/React Angular com hash "/#/"
+      if (path === "/") return "/#/login";
+      return path;
     }
   })
 );
 
-const port = process.env.PORT || 10000;
-app.listen(port, () => console.log(`Reverse proxy ativo na porta ${port}`));
+app.listen(10000, () => {
+  console.log("✅ Proxy rodando na porta 10000");
+});
