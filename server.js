@@ -15,14 +15,12 @@ app.use("/", createProxyMiddleware({
   changeOrigin: true,
   ws: true,
   onProxyReq: (proxyReq, req, res) => {
-    // Remove HTTPS redirect dos serviços que esperam HTTP
     proxyReq.setHeader("X-Forwarded-Proto", "http");
   }
 }));
 
-const port = process.env.PORT || 10000;
-app.listen(port, () => console.log(`✅ Proxy ativo na porta ${port}`));
+// Render define a porta automaticamente — não use porta fixa!
+const port = process.env.PORT;
 
-app.listen(10000, () => {
-  console.log("✅ Proxy rodando na porta 10000");
-});
+app.listen(port, "0.0.0.0", () => console.log(`✅ Proxy ativo na porta ${port}`));
+
