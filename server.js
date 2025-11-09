@@ -3,29 +3,23 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 
-// Permite acesso externo
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
+// Evita loops de redirecionamento
+app.set("trust proxy", true);
 
-// Redireciona root para /#/login
-app.get("/", (req, res) => {
-  res.redirect("/#/login");
-});
-
-// Proxy para o servidor real
+// Proxy direto para o app
 app.use(
   "/",
   createProxyMiddleware({
     target: "http://34.198.204.124:9001",
     changeOrigin: true,
     ws: true,
-    timeout: 60000,
-    proxyTimeout: 60000
+    followRedirects: true,
+    onProxyReq: (proxyReq, req) => {
+      // Remove HTTPS force headers do app
+      proxyReq.removeHeader("x-forwarded-proto");
+    }
   })
 );
 
-// Porta do Render
-const port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Reverse proxy rodando na porta ${port}`));
+const port = process.env.PORT || 10000;
+app.listen(port, () => console.log(`Reverse proxy ativo na porta ${port}`));
