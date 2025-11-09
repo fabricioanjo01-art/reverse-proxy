@@ -5,9 +5,9 @@ const app = express();
 
 app.set("trust proxy", true);
 
-// Redireciona a raiz para /login
+// Redireciona a raiz para /#/login
 app.get("/", (req, res) => {
-  res.redirect("/login");
+  return res.redirect("/#/login");
 });
 
 app.use(
