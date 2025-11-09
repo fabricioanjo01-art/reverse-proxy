@@ -3,10 +3,13 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 
-// Evita loops de redirecionamento
 app.set("trust proxy", true);
 
-// Proxy direto para o app
+// Redireciona a raiz para /login
+app.get("/", (req, res) => {
+  res.redirect("/login");
+});
+
 app.use(
   "/",
   createProxyMiddleware({
@@ -14,9 +17,13 @@ app.use(
     changeOrigin: true,
     ws: true,
     followRedirects: true,
-    onProxyReq: (proxyReq, req) => {
-      // Remove HTTPS force headers do app
+    secure: false,
+    onProxyReq: (proxyReq) => {
       proxyReq.removeHeader("x-forwarded-proto");
+    },
+    onError(err, req, res) {
+      console.error("Proxy Error:", err);
+      res.status(500).send("Erro ao acessar o sistema origem");
     }
   })
 );
