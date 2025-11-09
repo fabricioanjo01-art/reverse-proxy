@@ -1,26 +1,18 @@
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
-
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const express = require("express");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 
-app.use(
-  '/',
-  createProxyMiddleware({
-    target: 'http://34.198.204.124:9001',
-    changeOrigin: true,
-    ws: true
-  })
-);
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log('Reverse proxy rodando na porta ' + port);
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
 });
+
+app.use("/", createProxyMiddleware({
+  target: "http://34.198.204.124:9001",
+  changeOrigin: true,
+  ws: true,
+}));
+
+const port = process.env.PORT || 10000;
+app.listen(port, () => console.log(`Proxy rodando na porta ${port}`));
