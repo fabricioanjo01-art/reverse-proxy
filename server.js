@@ -11,7 +11,7 @@ app.use((req, res, next) => {
 
 // Proxy para o servidor alvo
 app.use("/", createProxyMiddleware({
-  target: "http://34.198.204.124:9001",
+  target: "http://186.227.197.242:9001",
   changeOrigin: true,
   ws: true,
   onProxyReq: (proxyReq, req, res) => {
